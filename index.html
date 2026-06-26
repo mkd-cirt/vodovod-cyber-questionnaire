@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="mk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Водовод Скопје – задолжителен IT/OT/SCADA Cyber Resilience Questionnaire</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #5d667a;
+      --line: #d9e0ea;
+      --accent: #1f5eff;
+      --accent-dark: #1546bd;
+      --warn-bg: #fff6d8;
+      --warn-line: #f2c94c;
+      --ok: #167a3f;
+      --bad: #b42318;
+      --radius: 14px;
+      --shadow: 0 8px 22px rgba(19, 34, 66, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+    header {
+      background: linear-gradient(135deg, #0f2d64 0%, #1f5eff 100%);
+      color: #fff;
+      padding: 34px 18px;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; }
+    header h1 { margin: 0 0 8px; font-size: 28px; line-height: 1.2; }
+    header p { margin: 0; opacity: .92; max-width: 920px; }
+    main { padding: 22px 18px 50px; }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(245,247,251,.94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+      padding: 12px 0;
+      margin-bottom: 18px;
+    }
+    .toolbar .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    button, .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button.secondary { background: #e9eef8; color: #172033; }
+    button.warning { background: #fff0c2; color: #5b4100; }
+    button.danger { background: #ffe5e1; color: var(--bad); }
+    button.send { background: var(--ok); color: #fff; }
+    button:hover { filter: brightness(.96); }
+    input:required:invalid, select:required:invalid, textarea:required:invalid { border-color: #d92d20; background: #fffafa; }
+    .validation-box {
+      display: none;
+      border: 1px solid #d92d20;
+      background: #fff1f0;
+      color: #7a271a;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin: 12px 0 16px;
+      font-size: 14px;
+    }
+    .validation-box.show { display: block; }
+    .small { font-size: 12px; color: var(--muted); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .notice {
+      border: 1px solid var(--warn-line);
+      background: var(--warn-bg);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    h2 { margin: 0 0 10px; font-size: 21px; }
+    h3 { margin: 0 0 12px; font-size: 18px; }
+    .meta-grid, .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    label { display: block; font-weight: 700; margin: 0 0 6px; }
+    input[type="text"], input[type="email"], input[type="date"], select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 11px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+    }
+    textarea { min-height: 86px; resize: vertical; }
+    .q {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+    .q:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+    .q-title { font-weight: 700; margin-bottom: 8px; }
+    .q-code { color: var(--muted); font-size: 12px; font-weight: 700; margin-right: 6px; }
+    .hint { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .q-grid { display: grid; grid-template-columns: 220px 1fr; gap: 12px; }
+    .score-box {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .metric {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .metric strong { display: block; font-size: 24px; margin-top: 4px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #eef3ff;
+      color: #173d8f;
+      margin-left: 6px;
+    }
+    .section-note { color: var(--muted); margin: -3px 0 14px; }
+    .footer-note { color: var(--muted); font-size: 13px; margin-top: 18px; }
+    .required { color: var(--bad); }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 14px;
+      border-radius: 12px;
+      max-height: 360px;
+      overflow: auto;
+    }
+    details summary { cursor: pointer; font-weight: 700; }
+    @media (max-width: 820px) {
+      .meta-grid, .grid, .grid.three, .score-box { grid-template-columns: 1fr; }
+      .q-grid { grid-template-columns: 1fr; }
+      header h1 { font-size: 23px; }
+      .toolbar { position: static; }
+    }
+    @media print {
+      .toolbar, button { display: none !important; }
+      body { background: #fff; }
+      .card { box-shadow: none; break-inside: avoid; }
+      textarea { min-height: 60px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Водовод Скопје – IT/OT/SCADA Cyber Resilience Questionnaire</h1>
+      <p>Прашалник за брзо утврдување на фактичката состојба, приоритетите и можните области за UNDP поддршка во зајакнување на сајбер безбедноста на SCADA/OT и IT системите.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="toolbar">
+      <div class="row">
+        <button type="button" onclick="sendByEmail()" class="send">Прати по email</button>
+        <button type="button" onclick="saveNow()">Зачувај локално</button>
+        <button type="button" onclick="downloadJSON()">Export JSON</button>
+        <button type="button" onclick="downloadCSV()">Export CSV</button>
+        <button type="button" onclick="copyJSON()" class="secondary">Copy JSON</button>
+        <button type="button" onclick="window.print()" class="secondary">Print / Save PDF</button>
+        <button type="button" onclick="clearForm()" class="danger">Исчисти</button>
+        <span class="small" id="autosaveStatus">Autosave active</span>
+      </div>
+    </div>
+
+    <div id="validationBox" class="validation-box"></div>
+
+    <div class="notice">
+      <strong>Напомена за доверливост:</strong> Овој прашалник е наменет за контролирана размена на информации помеѓу Водовод Скопје, UNDP и релевантните институционални партнери. Не внесувајте лозинки, приватни клучеви, целосни јавни IP листи, VPN тајни, детални PLC logic податоци или други оперативно чувствителни информации. За чувствителни детали користете формулација „достапно во доверлив анекс“ и доставете ги преку безбеден канал.
+    </div>
+
+    <section class="card" id="intro">
+      <h2>0. Основни информации</h2>
+      <p class="section-note">Овој дел овозможува UNDP и експертскиот тим да знаат кој одговорил, од која организациска единица и за која временска состојба се однесуваат одговорите.</p>
+      <div class="meta-grid">
+        <div>
+          <label for="orgName">Организација <span class="required">*</span></label>
+          <input id="orgName" name="orgName" type="text" value="Водовод Скопје" required />
+        </div>
+        <div>
+          <label for="assessmentDate">Датум на пополнување <span class="required">*</span></label>
+          <input id="assessmentDate" name="assessmentDate" type="date" required />
+        </div>
+        <div>
+          <label for="respondentName">Име и презиме на одговорно лице <span class="required">*</span></label>
+          <input id="respondentName" name="respondentName" type="text" placeholder="на пр. раководител на IT/OT, CISO, технички директор" required />
+        </div>
+        <div>
+          <label for="respondentRole">Функција / организациска единица <span class="required">*</span></label>
+          <input id="respondentRole" name="respondentRole" type="text" required />
+        </div>
+        <div>
+          <label for="respondentEmail">Е-пошта <span class="required">*</span></label>
+          <input id="respondentEmail" name="respondentEmail" type="email" required />
+        </div>
+        <div>
+          <label for="classification">Класификација на одговорите <span class="required">*</span></label>
+          <select id="classification" name="classification" required>
+            <option value="TLP:AMBER">TLP:AMBER / доверливо за ограничена група</option>
+            <option value="TLP:GREEN">TLP:GREEN / ограничено споделување во заедница</option>
+            <option value="Internal">Internal / интерно</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <label for="strategicAmbition">Краток опис на главната амбиција / очекување од UNDP поддршката <span class="required">*</span></label>
+        <textarea id="strategicAmbition" name="strategicAmbition" placeholder="на пр. SCADA assessment, IT/OT segmentation, secure remote access, SOC/SIEM pilot, backup/DR, NIS2/ZБМИС readiness, обука..." required></textarea>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Брз индикативен преглед</h2>
+      <p class="section-note">Ова е автоматска проценка само врз основа на избраните одговори. Не претставува формален audit или certification.</p>
+      <div class="score-box">
+        <div class="metric">Одговорени прашања<strong id="answeredCount">0</strong></div>
+        <div class="metric">Позитивни контроли<strong id="yesCount">0</strong></div>
+        <div class="metric">Ризични празнини<strong id="gapCount">0</strong></div>
+        <div class="metric">Индикативна зрелост<strong id="maturityLabel">N/A</strong></div>
+      </div>
+    </section>
+
+    <div id="questionnaire"></div>
+
+    <section class="card">
+      <h2>Завршни приоритети за UNDP поддршка</h2>
+      <div class="grid">
+        <div>
+          <label for="topRisks">Топ 5 ризици според Водовод Скопје <span class="required">*</span></label>
+          <textarea id="topRisks" name="topRisks" placeholder="1. ...&#10;2. ...&#10;3. ..." required></textarea>
+        </div>
+        <div>
+          <label for="topProjects">Топ 5 најкорисни проектни поддршки <span class="required">*</span></label>
+          <textarea id="topProjects" name="topProjects" placeholder="1. OT/SCADA assessment&#10;2. Secure remote access&#10;3. Backup/DR... " required></textarea>
+        </div>
+        <div>
+          <label for="sixMonthOutcome">Кој резултат би бил најкорисен во следните 6 месеци? <span class="required">*</span></label>
+          <textarea id="sixMonthOutcome" name="sixMonthOutcome" required></textarea>
+        </div>
+        <div>
+          <label for="supportPreference">Каков тип поддршка е најпотребен? <span class="required">*</span></label>
+          <select id="supportPreference" name="supportPreference" required>
+            <option value="">Избери...</option>
+            <option>Проценка и roadmap</option>
+            <option>Техничка спецификација за набавка</option>
+            <option>Имплементација на технички мерки</option>
+            <option>Обука и tabletop exercise</option>
+            <option>Комбиниран пакет</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:14px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+        <button type="button" onclick="sendByEmail()" class="send">Прати по email до sevdali.selmani@aec.mk</button>
+        <button type="button" onclick="downloadJSON()" class="secondary">Сними JSON копија</button>
+      </div>
+      <p class="footer-note">По пополнување, кликнете <strong>Прати по email</strong>. Страницата ќе ги провери задолжителните полиња и ќе отвори подготвен email до <strong>sevdali.selmani@aec.mk</strong>. Бидејќи GitHub Pages е статична страница, автоматско испраќање без email-клиент бара backend или доверлив form service; затоа оваа верзија не испраќа податоци на надворешен сервер.</p>
+    </section>
+
+    <section class="card">
+      <details>
+        <summary>Преглед на JSON податоци</summary>
+        <pre id="jsonPreview">{}</pre>
+      </details>
+    </section>
+  </main>
+
+  <script>
+    const OPTIONS = ["", "Да", "Делумно", "Не", "Не знам / не е применливо"];
+
+    const sections = [
+      {
+        id: "critical-processes",
+        title: "1. Критични процеси и оперативен континуитет",
+        note: "Целта е да се разбере кои услуги и процеси најбрзо би влијаеле врз водоснабдувањето ако има cyber incident.",
+        questions: [
+          ["CP1", "Дали се идентификувани најкритичните процеси за водоснабдување, притисок, резервоари, пумпни станици, бунари, хлорирање и телеметрија?"],
+          ["CP2", "Дали постои формална листа на системи чиј прекин би имал директно влијание врз услугата за граѓаните?"],
+          ["CP3", "Дали е дефинирано колку долго организацијата може да работи без SCADA/HMI функционалност?"],
+          ["CP4", "Дали постојат процедури за рачно работење ако SCADA е недостапна 24–72 часа?"],
+          ["CP5", "Дали е извршена Business Impact Analysis за критични IT и OT системи?"],
+          ["CP6", "Кои се трите најкритични оперативни сценарија што најмногу ве загрижуваат?", "textarea"]
+        ]
+      },
+      {
+        id: "scada-architecture",
+        title: "2. SCADA/OT архитектура",
+        note: "Овој дел треба да даде основна слика за SCADA/OT окружувањето без внесување чувствителни технички детали.",
+        questions: [
+          ["OT1", "Дали постои ажурирана SCADA/OT архитектурна шема?"],
+          ["OT2", "Дали се документирани SCADA server, HMI, historian, engineering stations, PLC/RTU, switches, routers и комуникациски врски?"],
+          ["OT3", "Дали е познато кои OT уреди се legacy/EOL/EOS и не можат редовно да се patch-ираат?"],
+          ["OT4", "Дали постои посебна engineering workstation за промени во PLC/RTU конфигурации?"],
+          ["OT5", "Дали постои change management процедура за промени во SCADA/PLC/RTU?"],
+          ["OT6", "Опишете ја SCADA/OT архитектурата на високо ниво: централна SCADA, локации, комуникации, vendor-и, без детални IP/лозинки.", "textarea"]
+        ]
+      },
+      {
+        id: "segmentation",
+        title: "3. IT/OT сегментација и мрежна заштита",
+        note: "Целта е да се утврди дали напад од IT може да се прошири кон OT/SCADA и дали постои контролирана зона за размена на податоци.",
+        questions: [
+          ["SEG1", "Дали SCADA/OT мрежата е логички или физички одвоена од корпоративната IT мрежа?"],
+          ["SEG2", "Дали постои firewall/industrial firewall меѓу IT и OT?"],
+          ["SEG3", "Дали постои OT DMZ за размена на податоци меѓу IT и OT?"],
+          ["SEG4", "Дали се документирани сите дозволени комуникации меѓу IT и OT по извор, дестинација, порт и протокол?"],
+          ["SEG5", "Дали SCADA/HMI/engineering workstations немаат директен интернет пристап?"],
+          ["SEG6", "Дали се користи jump server/bastion host за административен пристап кон OT?"],
+          ["SEG7", "Кои се главните предизвици за подобра IT/OT сегментација?", "textarea"]
+        ]
+      },
+      {
+        id: "remote-access",
+        title: "4. Remote access и vendor пристап",
+        note: "Vendor и далечинскиот пристап се едни од најкритичните ризици кај SCADA/OT системи.",
+        questions: [
+          ["RA1", "Дали постои далечински пристап до SCADA/OT системи?"],
+          ["RA2", "Дали далечинскиот пристап е временски ограничен и се активира само по одобрување?"],
+          ["RA3", "Дали сите remote access корисници користат MFA?"],
+          ["RA4", "Дали vendor account-и се индивидуални, а не shared accounts?"],
+          ["RA5", "Дали remote sessions се логираат и периодично се прегледуваат?"],
+          ["RA6", "Дали договорите со vendor-и содржат cybersecurity, incident notification и access control барања?"],
+          ["RA7", "Наведете типови vendor пристап без да наведувате лозинки, VPN тајни или чувствителни технички детали.", "textarea"]
+        ]
+      },
+      {
+        id: "asset-inventory",
+        title: "5. Asset inventory и конфигурациски менаџмент",
+        note: "Без точна листа на средства не може да се направи реална проценка на ризик.",
+        questions: [
+          ["AI1", "Дали постои ажуриран asset inventory за IT системи?"],
+          ["AI2", "Дали постои ажуриран asset inventory за OT/SCADA системи?"],
+          ["AI3", "Дали inventory содржи верзија на OS, firmware, апликација, локација, сопственик и критичност?"],
+          ["AI4", "Дали постои процес за откривање нови/непознати уреди во IT и OT мрежите?"],
+          ["AI5", "Дали критичните системи имаат назначен system owner и technical owner?"],
+          ["AI6", "Кои податоци недостасуваат за да се добие целосна слика за IT/OT assets?", "textarea"]
+        ]
+      },
+      {
+        id: "backup-recovery",
+        title: "6. Backup, restore, disaster recovery и resilience",
+        note: "Целта е да се потврди дали системите можат да се вратат по ransomware, дефект или компромитација.",
+        questions: [
+          ["BR1", "Дали постојат редовни backup-и за критичните IT системи?"],
+          ["BR2", "Дали постојат backup-и за SCADA/HMI projects, PLC logic, historian и engineering workstations?"],
+          ["BR3", "Дали има offline или immutable backup копија?"],
+          ["BR4", "Дали е направен restore test во последните 12 месеци?"],
+          ["BR5", "Дали се дефинирани RTO/RPO за критични IT и OT системи?"],
+          ["BR6", "Дали постои Disaster Recovery Plan за ransomware или недостапност на SCADA?"],
+          ["BR7", "Опишете ги најголемите предизвици за backup/restore и DR.", "textarea"]
+        ]
+      },
+      {
+        id: "monitoring-detection",
+        title: "7. Monitoring, logging и detection capability",
+        note: "Овој дел покажува дали инцидентите може да се откријат рано и да се истражат со логови.",
+        questions: [
+          ["MON1", "Дали постои централизирано логирање за критични IT системи?"],
+          ["MON2", "Дали логовите од firewall, VPN, AD, сервери и критични апликации се собираат и чуваат доволно долго?"],
+          ["MON3", "Дали постои SIEM, managed monitoring или SOC услуга?"],
+          ["MON4", "Дали постои OT passive monitoring или IDS за SCADA/OT мрежата?"],
+          ["MON5", "Дали постојат alerts за необични VPN логирања, admin активности, malware, нови уреди или lateral movement?"],
+          ["MON6", "Дали има дефиниран процес кој ги прегледува alerts и во кој рок?"],
+          ["MON7", "Кој monitoring capability би бил најкорисен како pilot проект?", "textarea"]
+        ]
+      },
+      {
+        id: "incident-response",
+        title: "8. Incident response, координација и пријавување",
+        note: "Овој дел е важен за подготовка кон ЗБМИС/NIS2 логиката и за координација со MKD-CIRT.",
+        questions: [
+          ["IR1", "Дали постои формален Cyber Incident Response Plan?"],
+          ["IR2", "Дали планот опфаќа и OT/SCADA сценарија, а не само IT инциденти?"],
+          ["IR3", "Дали постои листа на критични контакти: IT, OT, management, vendor, MKD-CIRT, други институции?"],
+          ["IR4", "Дали се дефинирани критериуми кога инцидент се ескалира кон раководство и MKD-CIRT?"],
+          ["IR5", "Дали е спроведена tabletop exercise во последните 12 месеци?"],
+          ["IR6", "Дали постојат playbooks за ransomware, phishing, compromised VPN/vendor account, SCADA outage и data breach?"],
+          ["IR7", "Опишете како би изгледала првата реакција во првите 30 минути од cyber incident.", "textarea"]
+        ]
+      },
+      {
+        id: "it-security",
+        title: "9. IT cybersecurity baseline",
+        note: "Најчестиот влез во критична инфраструктура е преку phishing, лозинки, VPN, endpoint или Active Directory.",
+        questions: [
+          ["IT1", "Дали се користи MFA за email, VPN и privileged/admin accounts?"],
+          ["IT2", "Дали постои EDR/XDR или само традиционален антивирус?"],
+          ["IT3", "Дали Active Directory е hardening-уван и редовно се прегледуваат privileged accounts?"],
+          ["IT4", "Дали постои редовен patch management процес за сервери и работни станици?"],
+          ["IT5", "Дали се вршат vulnerability scans на IT системи?"],
+          ["IT6", "Дали email домените имаат SPF, DKIM и DMARC?"],
+          ["IT7", "Дали постои asset-based endpoint protection за критични сервери?"],
+          ["IT8", "Наведете ги најкритичните IT системи: ERP, billing, GIS, customer database, AD, email, web services, други.", "textarea"]
+        ]
+      },
+      {
+        id: "governance",
+        title: "10. Governance, политики и ЗБМИС/NIS2 readiness",
+        note: "Овој дел ја мери организациската подготвеност, а не само техничката зрелост.",
+        questions: [
+          ["GOV1", "Дали има назначено лице или тим одговорен за сајбер безбедност?"],
+          ["GOV2", "Дали раководството има формално усвоена cybersecurity policy?"],
+          ["GOV3", "Дали постои cybersecurity risk register?"],
+          ["GOV4", "Дали постојат политики за access control, backup, incident response, patching, supplier security и acceptable use?"],
+          ["GOV5", "Дали раководството редовно добива cybersecurity извештаи?"],
+          ["GOV6", "Дали е започната подготовка за ЗБМИС/NIS2 усогласување?"],
+          ["GOV7", "Кои governance документи би биле најпотребни како UNDP deliverables?", "textarea"]
+        ]
+      },
+      {
+        id: "supply-chain",
+        title: "11. Supply chain, јавни набавки и vendor management",
+        note: "Нови SCADA, IoT, smart metering, cloud или IT набавки треба однапред да содржат cybersecurity барања.",
+        questions: [
+          ["SC1", "Дали јавните набавки за IT/OT системи содржат cybersecurity барања?"],
+          ["SC2", "Дали договорите бараат security updates, patch support и vulnerability notification?"],
+          ["SC3", "Дали vendor-и се обврзани да пријават безбедносен инцидент што може да влијае на Водовод?"],
+          ["SC4", "Дали се бара документација за архитектура, hardening, backup и admin access при примопредавање?"],
+          ["SC5", "Дали постои периодичен review на vendor accounts и пристапи?"],
+          ["SC6", "Кои идни набавки/модернизации треба да добијат cybersecurity клаузули?", "textarea"]
+        ]
+      },
+      {
+        id: "training-awareness",
+        title: "12. Обука, свесност и капацитети",
+        note: "Луѓето и процедурите се исто толку важни како технологијата.",
+        questions: [
+          ["TR1", "Дали има редовна cyber awareness обука за сите вработени?"],
+          ["TR2", "Дали IT персоналот има специјализирана обука за incident response, AD, EDR, backup/DR или SIEM?"],
+          ["TR3", "Дали OT/SCADA персоналот има обука за OT cybersecurity и безбедно работење со vendor-и?"],
+          ["TR4", "Дали раководството има обука за NIS2/ZБМИС accountability и crisis management?"],
+          ["TR5", "Дали се изведуваат phishing simulations или практични вежби?"],
+          ["TR6", "Кои обуки би биле најкорисни во следните 6–12 месеци?", "textarea"]
+        ]
+      },
+      {
+        id: "project-prioritization",
+        title: "13. Приоритизација на можни UNDP проекти",
+        note: "Означете каде би имало најголема вредност од поддршка.",
+        questions: [
+          ["PR1", "OT/SCADA cybersecurity assessment и risk register"],
+          ["PR2", "IT/OT segmentation design и pilot implementation"],
+          ["PR3", "Secure remote access за vendors и administrators"],
+          ["PR4", "Backup, restore и ransomware recovery readiness"],
+          ["PR5", "OT passive monitoring / detection pilot"],
+          ["PR6", "SIEM/SOC light или centralized logging"],
+          ["PR7", "NIS2/ZБМИС readiness package: policies, procedures, reporting templates"],
+          ["PR8", "Tabletop exercise: ransomware/SCADA outage/compromised vendor"],
+          ["PR9", "Cybersecurity clauses за јавни набавки и supplier security"],
+          ["PR10", "Обука за IT, OT и management"],
+          ["PR11", "Опишете го идеалниот проектен пакет според вашите потреби.", "textarea"]
+        ],
+        customOptions: ["", "Висок приоритет", "Среден приоритет", "Низок приоритет", "Не е потребно / не знам"]
+      }
+    ];
+
+    function todayISO() {
+      const d = new Date();
+      const tzOffset = d.getTimezoneOffset() * 60000;
+      return new Date(d - tzOffset).toISOString().slice(0,10);
+    }
+
+    function renderQuestions() {
+      const root = document.getElementById('questionnaire');
+      root.innerHTML = '';
+      sections.forEach(section => {
+        const card = document.createElement('section');
+        card.className = 'card';
+        card.id = section.id;
+        const opts = section.customOptions || OPTIONS;
+        card.innerHTML = `<h2>${section.title}</h2><p class="section-note">${section.note}</p>`;
+        section.questions.forEach(([code, text, type]) => {
+          const q = document.createElement('div');
+          q.className = 'q';
+          if (type === 'textarea') {
+            q.innerHTML = `
+              <div class="q-title"><span class="q-code">${code}</span>${text}</div>
+              <textarea name="${code}__text" data-question-code="${code}" data-question-text="${escapeHtml(text)}" placeholder="Краток фактички опис / тековна состојба / очекувана поддршка" required></textarea>
+            `;
+          } else {
+            const optionHtml = opts.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o || 'Избери...')}</option>`).join('');
+            q.innerHTML = `
+              <div class="q-title"><span class="q-code">${code}</span>${text}</div>
+              <div class="q-grid">
+                <div>
+                  <label for="${code}__answer">Одговор <span class="required">*</span></label>
+                  <select id="${code}__answer" name="${code}__answer" data-question-code="${code}" data-question-text="${escapeHtml(text)}" required>${optionHtml}</select>
+                </div>
+                <div>
+                  <label for="${code}__evidence">Фактички опис / доказ / коментар <span class="required">*</span></label>
+                  <textarea id="${code}__evidence" name="${code}__evidence" placeholder="Опишете кратко: што постои, од кога, кој е сопственик, дали има документ/процедура, кои се празнините. Ако деталите се чувствителни, напишете: Достапно во доверлив анекс." required></textarea>
+                </div>
+              </div>
+            `;
+          }
+          card.appendChild(q);
+        });
+        root.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+    }
+
+    function collectData() {
+      const metaFields = ['orgName','assessmentDate','respondentName','respondentRole','respondentEmail','classification','strategicAmbition','topRisks','topProjects','sixMonthOutcome','supportPreference'];
+      const meta = {};
+      metaFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) meta[id] = el.value || '';
+      });
+
+      const responses = [];
+      sections.forEach(section => {
+        section.questions.forEach(([code, text, type]) => {
+          if (type === 'textarea') {
+            const el = document.querySelector(`[name="${code}__text"]`);
+            responses.push({ section: section.title, code, question: text, type: 'text', answer: el ? el.value : '', evidence: '' });
+          } else {
+            const ans = document.querySelector(`[name="${code}__answer"]`);
+            const ev = document.querySelector(`[name="${code}__evidence"]`);
+            responses.push({ section: section.title, code, question: text, type: 'choice', answer: ans ? ans.value : '', evidence: ev ? ev.value : '' });
+          }
+        });
+      });
+
+      return {
+        questionnaire: 'Vodovod AD Skopje IT/OT/SCADA Cyber Resilience Questionnaire',
+        version: '1.1-required-email',
+        generatedAt: new Date().toISOString(),
+        confidentialityNote: 'Do not include passwords, secrets, private keys, full IP lists or sensitive operational details in this export.',
+        meta,
+        responses,
+        summary: computeSummary(responses)
+      };
+    }
+
+    function computeSummary(responses) {
+      let answered = 0, yes = 0, gaps = 0, partial = 0, priorityHigh = 0;
+      responses.forEach(r => {
+        if ((r.answer && r.answer.trim()) || (r.evidence && r.evidence.trim())) answered++;
+        if (r.answer === 'Да') yes++;
+        if (r.answer === 'Не') gaps++;
+        if (r.answer === 'Делумно') partial++;
+        if (r.answer === 'Висок приоритет') priorityHigh++;
+      });
+      const choiceResponses = responses.filter(r => r.type === 'choice' && r.answer && !r.answer.includes('приоритет'));
+      const score = choiceResponses.length ? Math.round(((yes * 2 + partial) / (choiceResponses.length * 2)) * 100) : 0;
+      let maturity = 'N/A';
+      if (choiceResponses.length) {
+        if (score < 25) maturity = 'Initial';
+        else if (score < 45) maturity = 'Basic';
+        else if (score < 65) maturity = 'Defined';
+        else if (score < 80) maturity = 'Managed';
+        else maturity = 'Resilient';
+      }
+      return { answered, yes, partial, gaps, priorityHigh, scorePercent: score, maturity };
+    }
+
+    function updatePreview() {
+      const data = collectData();
+      document.getElementById('jsonPreview').textContent = JSON.stringify(data, null, 2);
+      document.getElementById('answeredCount').textContent = data.summary.answered;
+      document.getElementById('yesCount').textContent = data.summary.yes;
+      document.getElementById('gapCount').textContent = data.summary.gaps;
+      document.getElementById('maturityLabel').textContent = data.summary.maturity;
+    }
+
+    function saveNow() {
+      localStorage.setItem('vodovodCyberQuestionnaire', JSON.stringify(collectData()));
+      const s = document.getElementById('autosaveStatus');
+      s.textContent = 'Saved locally: ' + new Date().toLocaleTimeString();
+      updatePreview();
+    }
+
+    function restoreSaved() {
+      const raw = localStorage.getItem('vodovodCyberQuestionnaire');
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        const meta = data.meta || {};
+        Object.entries(meta).forEach(([id, value]) => {
+          const el = document.getElementById(id);
+          if (el) el.value = value;
+        });
+        (data.responses || []).forEach(r => {
+          const ans = document.querySelector(`[name="${r.code}__answer"]`);
+          const ev = document.querySelector(`[name="${r.code}__evidence"]`);
+          const tx = document.querySelector(`[name="${r.code}__text"]`);
+          if (ans) ans.value = r.answer || '';
+          if (ev) ev.value = r.evidence || '';
+          if (tx) tx.value = r.answer || '';
+        });
+      } catch (e) { console.warn(e); }
+    }
+
+    function download(filename, text, type='application/octet-stream') {
+      const blob = new Blob([text], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function safeName() {
+      const org = (document.getElementById('orgName').value || 'vodovod').replace(/[^a-zA-Z0-9_-]+/g, '_');
+      const date = document.getElementById('assessmentDate').value || todayISO();
+      return `${org}_cyber_questionnaire_${date}`;
+    }
+
+    function downloadJSON() {
+      const data = collectData();
+      download(`${safeName()}.json`, JSON.stringify(data, null, 2), 'application/json;charset=utf-8');
+    }
+
+    function csvEscape(v) {
+      const s = String(v ?? '');
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+
+    function downloadCSV() {
+      const data = collectData();
+      const rows = [['Section','Code','Question','Answer','Evidence/Comment']];
+      data.responses.forEach(r => rows.push([r.section, r.code, r.question, r.answer, r.evidence]));
+      const csv = rows.map(row => row.map(csvEscape).join(',')).join('\n');
+      download(`${safeName()}.csv`, csv, 'text/csv;charset=utf-8');
+    }
+
+    async function copyJSON() {
+      const txt = JSON.stringify(collectData(), null, 2);
+      try {
+        await navigator.clipboard.writeText(txt);
+        document.getElementById('autosaveStatus').textContent = 'JSON copied to clipboard';
+      } catch (e) {
+        alert('Clipboard copy failed. Use Export JSON instead.');
+      }
+    }
+
+
+    function getFieldLabel(el) {
+      if (!el) return 'Непознато поле';
+      if (el.id) {
+        const label = document.querySelector(`label[for="${el.id}"]`);
+        if (label) return label.textContent.replace('*','').trim();
+      }
+      const q = el.closest('.q');
+      if (q) {
+        const title = q.querySelector('.q-title');
+        if (title) return title.textContent.trim();
+      }
+      return el.name || el.id || 'Поле';
+    }
+
+    function markAllRequired() {
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el.type !== 'button' && el.type !== 'submit' && el.type !== 'hidden') el.required = true;
+      });
+      document.querySelectorAll('.q-title').forEach(t => {
+        if (!t.querySelector('.required')) {
+          const s = document.createElement('span');
+          s.className = 'required';
+          s.textContent = ' *';
+          t.appendChild(s);
+        }
+      });
+    }
+
+    function validateRequiredFields() {
+      markAllRequired();
+      const fields = Array.from(document.querySelectorAll('input[required], textarea[required], select[required]'));
+      const missing = [];
+      fields.forEach(el => {
+        const value = (el.value || '').trim();
+        if (!value) missing.push(el);
+        if (el.type === 'email' && value && !el.checkValidity()) missing.push(el);
+      });
+      const uniqueMissing = Array.from(new Set(missing));
+      const box = document.getElementById('validationBox');
+      if (uniqueMissing.length) {
+        const first = uniqueMissing[0];
+        const labels = uniqueMissing.slice(0, 12).map(el => '• ' + escapeHtml(getFieldLabel(el))).join('<br>');
+        const extra = uniqueMissing.length > 12 ? `<br>…и уште ${uniqueMissing.length - 12} полиња.` : '';
+        box.innerHTML = `<strong>Пополнувањето не е целосно.</strong><br>Сите полиња се задолжителни. Пополнете ги означените полиња пред праќање:<br>${labels}${extra}<br><br><em>За чувствителни SCADA/OT детали може да внесете: „Достапно во доверлив анекс“.</em>`;
+        box.classList.add('show');
+        first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => first.focus(), 350);
+        return false;
+      }
+      box.classList.remove('show');
+      box.innerHTML = '';
+      return true;
+    }
+
+    function buildEmailBody(data, includeFullResponses=true) {
+      const m = data.meta || {};
+      const lines = [];
+      lines.push('Почитувани,');
+      lines.push('');
+      lines.push('Во прилог/подолу се доставуваат одговорите од прашалникот за Водовод Скопје – IT/OT/SCADA Cyber Resilience, за потребите на UNDP поддршката.');
+      lines.push('');
+      lines.push('=== Основни информации ===');
+      lines.push(`Организација: ${m.orgName || ''}`);
+      lines.push(`Датум: ${m.assessmentDate || ''}`);
+      lines.push(`Одговорно лице: ${m.respondentName || ''}`);
+      lines.push(`Функција/единица: ${m.respondentRole || ''}`);
+      lines.push(`Е-пошта: ${m.respondentEmail || ''}`);
+      lines.push(`Класификација: ${m.classification || ''}`);
+      lines.push('');
+      lines.push('=== Главна амбиција / очекување ===');
+      lines.push(m.strategicAmbition || '');
+      lines.push('');
+      lines.push('=== Индикативен summary ===');
+      lines.push(`Одговорени прашања: ${data.summary.answered}`);
+      lines.push(`Позитивни контроли: ${data.summary.yes}`);
+      lines.push(`Ризични празнини: ${data.summary.gaps}`);
+      lines.push(`Индикативна зрелост: ${data.summary.maturity} (${data.summary.scorePercent}%)`);
+      lines.push('');
+      lines.push('=== Завршни приоритети ===');
+      lines.push(`Топ ризици:\n${m.topRisks || ''}`);
+      lines.push('');
+      lines.push(`Топ проектни поддршки:\n${m.topProjects || ''}`);
+      lines.push('');
+      lines.push(`Најкорисен резултат во следните 6 месеци:\n${m.sixMonthOutcome || ''}`);
+      lines.push('');
+      lines.push(`Тип поддршка: ${m.supportPreference || ''}`);
+      if (includeFullResponses) {
+        lines.push('');
+        lines.push('=== Детални одговори ===');
+        data.responses.forEach(r => {
+          lines.push('');
+          lines.push(`[${r.code}] ${r.question}`);
+          lines.push(`Одговор: ${r.answer || ''}`);
+          if (r.evidence) lines.push(`Фактички опис/коментар: ${r.evidence}`);
+        });
+      } else {
+        lines.push('');
+        lines.push('Деталните одговори се автоматски снимени како JSON/CSV од прашалникот. Ве молиме прикачете го генерираниот JSON фајл доколку email-клиентот не го вметне целосниот текст во телото на пораката.');
+      }
+      lines.push('');
+      lines.push('Со почит,');
+      return lines.join('\n');
+    }
+
+    async function sendByEmail() {
+      updatePreview();
+      saveNow();
+      if (!validateRequiredFields()) return;
+      const data = collectData();
+      const subject = `Vodovod AD Skopje – IT/OT/SCADA Cyber Questionnaire – ${data.meta.assessmentDate || todayISO()}`;
+      const fullBody = buildEmailBody(data, true);
+      const shortBody = buildEmailBody(data, false);
+      const maxMailtoLength = 16000;
+      let bodyToUse = fullBody;
+      if (encodeURIComponent(fullBody).length > maxMailtoLength) {
+        bodyToUse = shortBody;
+        downloadJSON();
+        downloadCSV();
+        try { await navigator.clipboard.writeText(JSON.stringify(data, null, 2)); } catch(e) {}
+        alert('Одговорите се валидирани. Поради должината на прашалникот, email body може да биде предолг за некои email клиенти. Затоа автоматски ќе се сними JSON и CSV копија; прикачете го JSON фајлот на email пораката ако целосните одговори не се вметнати во телото.');
+      }
+      const mailto = `mailto:sevdali.selmani@aec.mk?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyToUse)}`;
+      window.location.href = mailto;
+    }
+
+    function clearForm() {
+      if (!confirm('Дали сте сигурни дека сакате да ги избришете сите локално внесени одговори?')) return;
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el.id === 'orgName') el.value = 'Водовод Скопје';
+        else if (el.id === 'assessmentDate') el.value = todayISO();
+        else if (el.id === 'classification') el.value = 'TLP:AMBER';
+        else el.value = '';
+      });
+      localStorage.removeItem('vodovodCyberQuestionnaire');
+      updatePreview();
+      document.getElementById('autosaveStatus').textContent = 'Cleared';
+    }
+
+    function init() {
+      renderQuestions();
+      document.getElementById('assessmentDate').value = todayISO();
+      restoreSaved();
+      markAllRequired();
+      updatePreview();
+      document.addEventListener('input', () => {
+        updatePreview();
+        clearTimeout(window.__saveTimer);
+        window.__saveTimer = setTimeout(saveNow, 600);
+      });
+      document.addEventListener('change', () => {
+        updatePreview();
+        saveNow();
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
